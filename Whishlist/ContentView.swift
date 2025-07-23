@@ -9,11 +9,51 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            List {
+                ForEach(wishes) { wish in
+                    Text(wish.title)
+                        .font(.title.weight(.light))
+                        .padding(.vertical, 2)
+                        .swipeActions {
+                            Button("Delete", role: .destructive) {
+                                ModelContext.delete(wish)
+                            }
+                        }
+                }
+            } //: LIST
+            .navigationTitle("Wishlist")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isAlertShowing.toggle()
+                    } label: {
+                        Image(systemName: "plus")
+                            .imageScale(.large)
+                    }
+                }
+                
+                if wishes.isEmpty != true {
+                    ToolbarItem(placement: .bottomBar) {
+                        Text("\(wishes.count) wish\(wishes.count > 1 ? "es" : "" )")
+                    }
+                }
+            }
+            .alert("Create a new wish", isPresented: $isAlertShowing) {
+                TextField("Enter a wish", text: $title)
+                
+                Button {
+                    modelContext.insert(Wish(title: title))
+                    title = ""
+                } label: {
+                    Text("Save")
+                }
+            }
+            .overlay {
+                if wishes.isEmpty {
+                    ContentUnavailableView("My Wishlist", systemImage: "heart.circle", description: Text("No wishes yet. Add one to get started."))
+                }
+            }
         }
         .padding()
     }
