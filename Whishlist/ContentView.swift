@@ -6,8 +6,15 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var wishes: [Wish]
+    
+    @State private var isAlertShowing: Bool = false
+    @State private var title: String = ""
+    
     var body: some View {
         NavigationStack {
             List {
@@ -55,10 +62,24 @@ struct ContentView: View {
                 }
             }
         }
-        .padding()
     }
 }
 
-#Preview {
+#Preview("List with Sample Data") {
+    let container = try! ModelContainer(for: Wish.self, configurations:
+    ModelConfiguration(isStoredInMemoryOnly: true))
+    
+    container.mainContext.insert(Wish(title: "Master SwiftData"))
+    container.mainContext.insert(Wish(title: "Buy a new iPhone"))
+    container.mainContext.insert(Wish(title: "Go to Europe"))
+    container.mainContext.insert(Wish(title: "Watch SwiftUI Tutorial"))
+    container.mainContext.insert(Wish(title: "Order on Jumia"))
+    
+    return ContentView()
+        .modelContainer(container)
+}
+
+#Preview("Empty List") {
     ContentView()
+        .modelContainer(for: Wish.self, inMemory: true)
 }
